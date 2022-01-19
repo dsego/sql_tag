@@ -9,12 +9,12 @@ q.prepare();
 
 // use numbered placeholders
 q.prepare("pg");
-// => ['SELECT * FROM table WHERE foo = $1 AND bar = $2, [foo, bar]]
+// => ['SELECT * FROM table WHERE foo = $1 AND bar = $2', [foo, bar]]
 
 // also supports arrays
 sql`SELECT * FROM table WHERE foo IN ${[1, 2, 3]}`;
 q.prepare();
-// => ['SELECT * FROM table WHERE foo IN (?, ?, ?), [1, 2, 3]]
+// => ['SELECT * FROM table WHERE foo IN (?, ?, ?)', [1, 2, 3]]
 ```
 
 #### Interpolating raw values with `sql.raw`
@@ -49,9 +49,9 @@ Useful for building dynamic queries.
 const q = sql`SELECT * FROM student WHERE score > (${sql
   `SELECT avg(score) FROM student WHERE subject = ${subject}`})`;
 q.prepare();
-// => [SELECT * FROM student WHERE grade > (
+// => ['SELECT * FROM student WHERE grade > (
 //      SELECT avg(grade) FROM student WHERE subject = ?
-//    ),
+//    )',
 //   [subject]]
 ```
 
@@ -65,7 +65,7 @@ if (foo) {
   query.append(svg`WHERE foo = ${foo}`);
 }
 query.prepare();
-// => [SELECT * FROM table WHERE foo = ?, [foo]]
+// => ['SELECT * FROM table WHERE foo = ?', [foo]]
 ```
 
 ### Tests
