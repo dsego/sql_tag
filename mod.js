@@ -12,7 +12,8 @@ class SqlStatement {
     this.values = values;
   }
 
-  parametrize(type = "sql") {
+  // target "" | "mysql" | "pg"
+  prepare(target = "") {
     const strings = [...this.strings];
     const values = [...this.values];
     let i = 0;
@@ -20,17 +21,25 @@ class SqlStatement {
     let params = [];
     while (i < strings.length) {
       query += strings[i];
-      if (values[i]) {
+
+      if (i < values.length) {
+        // support nested tagged template literals
         if (values[i] instanceof SqlStatement) {
           strings.splice(i + 1, 0, ...values[i].strings);
-          values.splice(i, 1, undefined, ...values[i].values, undefined);
-        } else if (Object.hasOwn(values[i], "identifier")) {
-          const delimiter = type === "mysql" ? "`" : '"';
-          query += escape(values[i].identifier, delimiter);
-        } else if (Object.hasOwn(values[i], "raw")) {
-          query += values[i].raw;
+          values.splice(i, 1, sql.raw(""), ...values[i].values, sql.raw(""));
+
+          // escape sql identifiers
+        } else if (values[i] instanceof SqlIdentifier) {
+          const delimiter = target === "mysql" ? "`" : '"';
+          query += escape(values[i].toString(), delimiter);
+
+          // embed raw strings
+        } else if (values[i] instanceof SqlRawValue) {
+          query += values[i].toString();
+
+          // parametrize values
         } else {
-          if (type === "pg") {
+          if (target === "pg") {
             query += `\$${i + 1}`;
             params.push(values[i]);
           } else {
@@ -65,10 +74,19 @@ export default function sql(strings, ...values) {
   return new SqlStatement(strings, values);
 }
 
-sql.raw = (raw) => {
-  return { raw };
-};
+class SqlValueWrapper {
+  constructor(value) {
+    this.value = value;
+  }
+  valueOf() {
+    return this.value;
+  }
+  toString() {
+    return String(this.value);
+  }
+}
+class SqlRawValue extends SqlValueWrapper {}
+class SqlIdentifier extends SqlValueWrapper {}
 
-sql.identifier = (identifier) => {
-  return { identifier };
-};
+sql.raw = (v) => new SqlRawValue(v);
+sql.identifier = (v) => new SqlIdentifier(v);
