@@ -5,7 +5,7 @@ JS tagged template literals for prepared SQL statements.
 ```js
 const q = sql`SELECT * FROM table WHERE foo = ${foo} AND bar = ${bar}`;
 q.prepare();
-// => ['SELECT * FROM table WHERE foo = ? AND bar = ?, [foo, bar]]
+// => ['SELECT * FROM table WHERE foo = ? AND bar = ?', [foo, bar]]
 
 // use numbered placeholders
 q.prepare("pg");
