@@ -10,7 +10,7 @@ const q = sql`SELECT * FROM table WHERE foo = ${foo} AND bar = ${bar}`;
 //    }
 ```
 
-Use numbered placeholders
+Use numbered placeholders:
 
 ```js
 import {pgsql as sql} from "https://deno.land/x/sql_tag/mod.js"
@@ -21,7 +21,7 @@ const q = sql`SELECT * FROM table WHERE foo = ${foo} AND bar = ${bar}`;
 //    }
 ```
 
-Also supports arrays
+Also supports arrays:
 ```js
 sql`SELECT * FROM table WHERE foo IN ${[1, 2, 3]}`;
 // => {
