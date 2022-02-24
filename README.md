@@ -55,9 +55,9 @@ q.prepare();
 //   [subject]]
 ```
 
-#### Append statements or strings
+#### Append statements
 
-Useful for building complex queries depending on conditions.
+Build complex queries depending on conditionals.
 
 ```js
 const query = svg`SELECT * FROM table`;
@@ -67,6 +67,34 @@ if (foo) {
 query.prepare();
 // => ['SELECT * FROM table WHERE foo = ?', [foo]]
 ```
+
+#### Join statements with `sql.join(statements, glue)`
+
+Join a list of sql statements with a glue string.
+
+```js
+const query = svg`UPDATE table SET ${
+  sql.join([
+    sql`col1 = ${foo}`,
+    sql`col2 = ${bar}`,
+  ], ', ')
+} WHERE id = ${id}`;
+
+query.prepare();
+// => ['UPDATE table SET col1 = ?, col2 = ? WHERE id = ?', [foo, bar, id]]
+
+const query = svg`SELECT * FROM table WHERE ${
+  sql.join([
+    sql`col1 = ${foo}`,
+    sql`col2 = ${bar}`,
+    sql`col3 = ${baz}`,
+  ], ' AND ')
+}`;
+
+query.prepare();
+// => ['SELECT * FROM table WHERE col1 = ? AND col2 = ? AND col3 = ?', [foo, bar, baz]]
+```
+
 
 ### Tests
 

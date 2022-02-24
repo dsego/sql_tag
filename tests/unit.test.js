@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+import { assertEquals, assertThrows } from "https://deno.land/std/testing/asserts.ts";
 import sql from "../mod.js";
 
 Deno.test("simple query", () => {
@@ -133,15 +133,6 @@ Deno.test("nested statement with values", () => {
   assertEquals(values, [foo, bar]);
 });
 
-Deno.test("append string", () => {
-  const stmt = sql`SELECT col FROM table`;
-  stmt.append("ORDER BY col DESC");
-  assertEquals(stmt.prepare(), [
-    "SELECT col FROM table ORDER BY col DESC",
-    [],
-  ]);
-});
-
 Deno.test("append sql statement", () => {
   const stmt = sql`SELECT col FROM table`;
   const foo = "foo";
@@ -152,5 +143,25 @@ Deno.test("append sql statement", () => {
   assertEquals(stmt.prepare(), [
     "SELECT col FROM table WHERE col > ? ORDER BY col DESC",
     ["foo"],
+  ]);
+});
+
+Deno.test("appending other stuff throws", () => {
+  const stmt = sql`SELECT col FROM table`;
+  assertThrows(() => stmt.append(""))
+  assertThrows(() => stmt.append(123))
+  assertThrows(() => stmt.append(() => null))
+  assertThrows(() => stmt.append(new Date()))
+});
+
+Deno.test("join sql statements", () => {
+  const stmt = sql.join([
+    sql`col1 = ${"foo"}`,
+    sql`col2 = ${"bar"}`,
+  ], " AND ")
+
+  assertEquals(stmt.prepare(), [
+    "col1 = ? AND col2 = ?",
+    ["foo", "bar"],
   ]);
 });

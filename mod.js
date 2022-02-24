@@ -59,13 +59,11 @@ class SqlStatement {
   }
 
   append(statement) {
-    if (statement instanceof SqlStatement) {
-      this.strings = [...this.strings, ...statement.strings];
-      this.values = [...this.values, sql.raw(" "), ...statement.values];
-    } else {
-      this.strings = [...this.strings, String(statement)];
-      this.values = [...this.values, sql.raw(" ")];
+    if (!(statement instanceof SqlStatement)) {
+      throw new Error("you can only append sql statements")
     }
+    this.strings = [...this.strings, ...statement.strings];
+    this.values = [...this.values, sql.raw(" "), ...statement.values];
     return this;
   }
 }
@@ -90,3 +88,18 @@ class SqlIdentifier extends SqlValueWrapper {}
 
 sql.raw = (v) => new SqlRawValue(v);
 sql.identifier = (v) => new SqlIdentifier(v);
+
+// accepts a list of SqlStatement objects and a glue string
+sql.join = (statements, glue="") => {
+  let strings = []
+  let values = []
+  for (let statement of statements) {
+    if (!(statement instanceof SqlStatement)) {
+      throw new Error("you can only join sql statements")
+    }
+    strings = strings.concat(statement.strings)
+    values = values.concat(statement.values)
+    values.push(sql.raw(glue))
+  }
+  return new SqlStatement(strings, values.slice(0, -1))
+}
