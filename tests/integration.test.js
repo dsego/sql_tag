@@ -2,7 +2,7 @@ import { DB as Sqlite } from "https://deno.land/x/sqlite@v3.2.0/mod.ts";
 import { Client as PgClient } from "https://deno.land/x/postgres@v0.15.0/mod.ts";
 import { Client as MysqlClient } from "https://deno.land/x/mysql@v2.10.2/mod.ts";
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-import sql from "../mod.js";
+import { mysql, pgsql, sql } from "../mod.js";
 
 Deno.test("mysql", async () => {
   const db = await new MysqlClient().connect({
@@ -11,11 +11,11 @@ Deno.test("mysql", async () => {
     db: "test",
   });
 
-  const query = async (sql) => db.execute(...sql.prepare("mysql"));
+  const exec = async ({ query, params }) => db.execute(query, params);
 
-  await query(sql`DROP TABLE IF EXISTS person`);
-  await query(sql`CREATE TABLE person (name varchar(255), age int)`);
-  await query(sql`INSERT INTO person (name, age)
+  await exec(mysql`DROP TABLE IF EXISTS person`);
+  await exec(mysql`CREATE TABLE person (name varchar(255), age int)`);
+  await exec(mysql`INSERT INTO person (name, age)
     VALUES
     (${"Jay"}, ${34}),
     (${"Brian"}, ${19}),
@@ -23,8 +23,8 @@ Deno.test("mysql", async () => {
     (${"Lara"}, ${45})
   `);
 
-  const { rows } = await query(
-    sql`SELECT * FROM person WHERE name LIKE ${"%L%"} and age > ${50}`,
+  const { rows } = await exec(
+    mysql`SELECT * FROM person WHERE name LIKE ${"%L%"} and age > ${50}`,
   );
   assertEquals(rows, [{ name: "Lizzy", age: 72 }]);
 
@@ -34,18 +34,18 @@ Deno.test("mysql", async () => {
 Deno.test("postgres", async () => {
   const db = new PgClient({
     hostname: "localhost",
-    port: 5431,
+    port: 5432,
     user: "deno",
     password: "deno",
     database: "test",
   });
   await db.connect();
 
-  const query = async (q) => db.queryArray(...q.prepare("pg"));
+  const exec = async ({ query, params }) => db.queryArray(query, params);
 
-  await query(sql`DROP TABLE IF EXISTS person`);
-  await query(sql`CREATE TABLE person (name varchar(255), age int)`);
-  await query(sql`INSERT INTO person (name, age)
+  await exec(pgsql`DROP TABLE IF EXISTS person`);
+  await exec(pgsql`CREATE TABLE person (name varchar(255), age int)`);
+  await exec(pgsql`INSERT INTO person (name, age)
     VALUES
     (${"Jay"}, ${34}),
     (${"Brian"}, ${19}),
@@ -53,20 +53,20 @@ Deno.test("postgres", async () => {
     (${"Lara"}, ${45})
   `);
 
-  const { rows } = await query(
-    sql`SELECT * FROM person WHERE name LIKE ${"%L%"} and age > ${50}`,
+  const { rows } = await exec(
+    pgsql`SELECT * FROM person WHERE name LIKE ${"%L%"} and age > ${50}`,
   );
   assertEquals(rows, [["Lizzy", 72]]);
   await db.end();
 });
 
 Deno.test("sqlite", async () => {
-  const query = async (q) => db.query(...q.prepare());
+  const exec = async ({ query, params }) => db.query(query, params);
   const db = new Sqlite("./test.db");
 
-  await query(sql`DROP TABLE IF EXISTS person`);
-  await query(sql`CREATE TABLE person (name varchar(255), age int)`);
-  await query(sql`INSERT INTO person (name, age)
+  await exec(sql`DROP TABLE IF EXISTS person`);
+  await exec(sql`CREATE TABLE person (name varchar(255), age int)`);
+  await exec(sql`INSERT INTO person (name, age)
     VALUES
     (${"Jay"}, ${34}),
     (${"Brian"}, ${19}),
@@ -74,7 +74,7 @@ Deno.test("sqlite", async () => {
     (${"Lara"}, ${45})
   `);
 
-  const rows = await query(
+  const rows = await exec(
     sql`SELECT * FROM person WHERE name LIKE ${"%L%"} and age > ${50}`,
   );
   assertEquals(rows, [["Lizzy", 72]]);

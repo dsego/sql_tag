@@ -7,26 +7,20 @@ const escape = (value, delimiter) => (
 );
 
 class SqlStatement {
-  constructor(strings, values) {
-    this.strings = strings;
-    this.values = values;
-  }
-
-  // target "" | "mysql" | "pg"
-  prepare(target = "") {
-    const strings = [...this.strings];
-    const values = [...this.values];
+  // target "" | "mysql" | "pgsql"
+  constructor(strings = [], values = [], target = "") {
     let i = 0;
     let query = "";
     let params = [];
+
     while (i < strings.length) {
       query += strings[i];
 
       if (i < values.length) {
         // support nested tagged template literals
         if (values[i] instanceof SqlStatement) {
-          strings.splice(i + 1, 0, ...values[i].strings);
-          values.splice(i, 1, sql.raw(""), ...values[i].values, sql.raw(""));
+          query += values[i].query;
+          params = params.concat(values[i].params);
 
           // escape sql identifiers
         } else if (values[i] instanceof SqlIdentifier) {
@@ -39,7 +33,7 @@ class SqlStatement {
 
           // parametrize values
         } else {
-          if (target === "pg") {
+          if (target === "pgsql") {
             query += `\$${i + 1}`;
             params.push(values[i]);
           } else {
@@ -55,21 +49,31 @@ class SqlStatement {
       }
       i += 1;
     }
-    return [query, params];
+
+    this.query = query;
+    this.params = params;
   }
 
   append(statement) {
     if (!(statement instanceof SqlStatement)) {
-      throw new Error("you can only append sql statements")
+      throw new Error("you can only append sql statements");
     }
-    this.strings = [...this.strings, ...statement.strings];
-    this.values = [...this.values, sql.raw(" "), ...statement.values];
+    this.query += " " + statement.query;
+    this.params = this.params.concat(statement.params);
     return this;
   }
 }
 
-export default function sql(strings, ...values) {
+export function sql(strings, ...values) {
   return new SqlStatement(strings, values);
+}
+
+export function mysql(strings, ...values) {
+  return new SqlStatement(strings, values, "mysql");
+}
+
+export function pgsql(strings, ...values) {
+  return new SqlStatement(strings, values, "pgsql");
 }
 
 class SqlValueWrapper {
@@ -90,16 +94,20 @@ sql.raw = (v) => new SqlRawValue(v);
 sql.identifier = (v) => new SqlIdentifier(v);
 
 // accepts a list of SqlStatement objects and a glue string
-sql.join = (statements, glue="") => {
-  let strings = []
-  let values = []
-  for (let statement of statements) {
-    if (!(statement instanceof SqlStatement)) {
-      throw new Error("you can only join sql statements")
+sql.join = (statements, glue = "") => {
+  let queries = [];
+  let values = [];
+
+  for (const s of statements) {
+    if (!(s instanceof SqlStatement)) {
+      throw new Error("you can only join sql statements");
     }
-    strings = strings.concat(statement.strings)
-    values = values.concat(statement.values)
-    values.push(sql.raw(glue))
+    queries = queries.concat(s.query);
+    values = values.concat(s.params);
   }
-  return new SqlStatement(strings, values.slice(0, -1))
-}
+
+  const result = new SqlStatement();
+  result.query = queries.join(glue);
+  result.params = values;
+  return result;
+};

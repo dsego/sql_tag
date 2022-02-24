@@ -2,6 +2,7 @@ services:
   mysql_db:
     # deno mysql driver has issues with mysql 8
     image: mysql:5.7
+    platform: linux/x86_64
     restart: always
     environment:
       MYSQL_USER: deno
@@ -13,11 +14,12 @@ services:
 
   pg_db:
     image: postgres:14
+    platform: linux/x86_64
     restart: always
     environment:
       POSTGRES_USER: deno
       POSTGRES_PASSWORD: deno
       POSTGRES_DB: test
     ports:
-      - 5431:5432
+      - 5432:5432
 
