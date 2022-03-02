@@ -1,3 +1,5 @@
+<img width="200px" style src="/media/svg_tag.png" />
+
 ## `sql` tag
 
 JS tagged template literals for prepared SQL statements.
