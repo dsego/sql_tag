@@ -128,5 +128,5 @@ const query = sql`SELECT * FROM table WHERE ${
 
 ### Inspired by
 
-- [Slonik](https://github.com/gajus/slonik)
+- [Slonik](https://github.com/gajus/slonik#slonik-sql-tag)
 - [SQL Template Strings](https://github.com/felixfbecker/node-sql-template-strings)
