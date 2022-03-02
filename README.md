@@ -1,4 +1,4 @@
-<img width="200px" style src="https://github.com/dsego/sql_tag/raw/main/media/svg_tag.png" />
+<img width="200px" style src="https://github.com/dsego/sql_tag/raw/main/media/sql_tag.svg" />
 
 ## `sql` tag
 
