@@ -92,6 +92,8 @@ class SqlIdentifier extends SqlValueWrapper {}
 
 sql.raw = (v) => new SqlRawValue(v);
 sql.identifier = (v) => new SqlIdentifier(v);
+sql.table = (v) => new SqlIdentifier(v);
+sql.column = (v) => new SqlIdentifier(v);
 
 // accepts a list of SqlStatement objects and a glue string
 sql.join = (statements, glue = "") => {
