@@ -1,0 +1,22 @@
+{
+  "name": "sql_tag",
+  "version": "0.1.0",
+  "description": "JS tagged template literals for prepared SQL statements.",
+  "main": "mod.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsego/sql_tag.git"
+  },
+  "author": "Davorin Sego",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dsego/sql_tag/issues"
+  },
+  "homepage": "https://github.com/dsego/sql_tag#readme"
+}
