@@ -113,6 +113,33 @@ const query = sql`SELECT * FROM table WHERE ${
 //    }
 ```
 
+#### Join statements with shortcuts
+
+Join a list of sql statements with `sql.and`, `sql.or`, `sql.comma`.
+The AND/OR statements are also wrapped in parentheses for easy nesting.
+
+```js
+const query = sql`UPDATE table SET
+  ${sql.comma(sql`col1 = ${foo}`, sql`col2 = ${bar}`)}
+  WHERE id = ${id}`;
+// => {
+//      query: 'UPDATE table SET col1 = ?, col2 = ? WHERE id = ?',
+//      params: [foo, bar, id]
+//    }
+
+const query = sql`SELECT * FROM table WHERE ${
+  sql.and(
+    sql`col1 = ${foo}`,
+    sql`col2 = ${bar}`,
+    sql`col3 = ${baz}`,
+  )
+}`;
+// => {
+//      query: 'SELECT * FROM table WHERE (col1 = ? AND col2 = ? AND col3 = ?)',
+//      params: [foo, bar, baz]
+//    }
+```
+
 ### Tests
 
 ##### Unit tests

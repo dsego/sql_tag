@@ -167,3 +167,33 @@ Deno.test("join sql statements", () => {
   assertEquals(example.query, "col1 = ? AND col2 = ?");
   assertEquals(example.params, ["foo", "bar"]);
 });
+
+Deno.test("and sql statements", () => {
+  const example = sql.and(
+    sql`col1 = ${"foo"}`,
+    sql`col2 = ${"bar"}`,
+  );
+
+  assertEquals(example.query, "(col1 = ? AND col2 = ?)");
+  assertEquals(example.params, ["foo", "bar"]);
+});
+
+Deno.test("and sql statements", () => {
+  const example = sql.or(
+    sql`col1 = ${"foo"}`,
+    sql`col2 = ${"bar"}`,
+    sql.and(sql`a`, sql`b`),
+  );
+  assertEquals(example.query, "(col1 = ? OR col2 = ? OR (a AND b))");
+  assertEquals(example.params, ["foo", "bar"]);
+});
+
+Deno.test("comma sql statements", () => {
+  const example = sql.comma(
+    sql`col1 = ${"foo"}`,
+    sql`col2 = ${"bar"}`,
+  );
+
+  assertEquals(example.query, "col1 = ?, col2 = ?");
+  assertEquals(example.params, ["foo", "bar"]);
+});

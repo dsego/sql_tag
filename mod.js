@@ -54,6 +54,11 @@ class SqlStatement {
     this.params = params;
   }
 
+  parenWrap() {
+    this.query = `(${this.query})`;
+    return this
+  }
+
   append(statement) {
     if (!(statement instanceof SqlStatement)) {
       throw new Error("you can only append sql statements");
@@ -113,3 +118,7 @@ sql.join = (statements, glue = "") => {
   result.params = values;
   return result;
 };
+
+sql.and = (...statements) => sql.join(statements, " AND ").parenWrap();
+sql.or = (...statements) => sql.join(statements, " OR ").parenWrap();
+sql.comma = (...statements) => sql.join(statements, ", ");
