@@ -115,8 +115,8 @@ const query = sql`SELECT * FROM table WHERE ${
 
 #### Join statements with shortcuts
 
-Join a list of sql statements with `sql.and`, `sql.or`, `sql.comma`.
-The AND/OR statements are also wrapped in parentheses for easy nesting.
+Join a list of sql statements with `sql.and`, `sql.or`, `sql.comma`. The AND/OR
+statements are also wrapped in parentheses for easy nesting.
 
 ```js
 const query = sql`UPDATE table SET

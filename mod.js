@@ -56,7 +56,7 @@ class SqlStatement {
 
   parenWrap() {
     this.query = `(${this.query})`;
-    return this
+    return this;
   }
 
   append(statement) {
